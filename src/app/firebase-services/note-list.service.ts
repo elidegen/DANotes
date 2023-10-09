@@ -53,6 +53,8 @@ export class NoteListService {
       list.forEach(element => {
         this.normalNotes.push(this.setNoteObject(element.data(), element.id));
       });
+      console.log('check', this.normalNotes);
+
     });
   }
 
