@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, collectionData, onSnapshot } from '@angular/fire/firestore';
+import { Firestore, collection, doc, addDoc, onSnapshot, updateDoc, DocumentReference } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -21,13 +21,38 @@ export class NoteListService {
     this.unsubNotes = this.subNotesList();
   }
 
+  async updateNote(note: Note) {
+    if (note.id) {
+      let docRef = this.getSingleDocRef('notes', note.id);
+      await updateDoc(docRef, this.getCleanJSON(note)).catch(
+        (err) => { console.error(err); }
+      ).then();
+    }
+  }
+
+  getCleanJSON(note: Note) {
+    return {
+      type: note.type,
+      title: note.title,
+      content: note.content,
+      marked: note.marked
+    }
+  }
+
+  async addNote(item: Note) {
+    await addDoc(this.getNotesRef(), item).catch(
+      (err) => { console.error(err) }
+    ).then(
+      (docRef) => { console.log('Document written with ID: ', docRef?.id); }
+    )
+  }
+
   ngOnDestroy() {
     this.unsubTrash();
     this.unsubNotes();
   }
 
   setNoteObject(obj: any, id: string): Note {
-    console.log('setNoteObject', obj);
     return {
       id: id,
       type: obj.type || 'note',
@@ -42,7 +67,6 @@ export class NoteListService {
       this.trashNotes = [];
       list.forEach(element => {
         this.trashNotes.push(this.setNoteObject(element.data(), element.id));
-        console.log('subtrashlist', this.trashNotes);
       });
     });
   }
@@ -53,8 +77,6 @@ export class NoteListService {
       list.forEach(element => {
         this.normalNotes.push(this.setNoteObject(element.data(), element.id));
       });
-      console.log('check', this.normalNotes);
-
     });
   }
 
