@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Note } from '../interfaces/note.interface';
-import { Firestore, collection, doc, addDoc, onSnapshot, updateDoc, DocumentReference } from '@angular/fire/firestore';
+import { Firestore, collection, doc, deleteDoc, addDoc, onSnapshot, updateDoc, DocumentReference } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -21,6 +21,12 @@ export class NoteListService {
     this.unsubNotes = this.subNotesList();
   }
 
+  async deleteNote(colId: "notes" | "trash", docId: string) {
+    await deleteDoc(this.getSingleDocRef(colId, docId)).catch(
+      (err) => { console.error(err) }
+    );
+  }
+
   async updateNote(note: Note) {
     if (note.id) {
       let docRef = this.getSingleDocRef('notes', note.id);
@@ -39,8 +45,11 @@ export class NoteListService {
     }
   }
 
-  async addNote(item: Note) {
-    await addDoc(this.getNotesRef(), item).catch(
+  async addNote(note: Note, colId: "notes" | "trash") { //
+    console.log(this.getNotesRef());
+    
+    
+    await addDoc(this.getNotesRef(), note).catch(
       (err) => { console.error(err) }
     ).then(
       (docRef) => { console.log('Document written with ID: ', docRef?.id); }

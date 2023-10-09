@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Note } from '../../interfaces/note.interface';
-import { NoteListService } from '../../firebase-services/note-list.service'
+import { NoteListService } from '../../firebase-services/note-list.service';
+import { doc } from 'rxfire/firestore';
 
 @Component({
   selector: 'app-note',
@@ -8,46 +9,53 @@ import { NoteListService } from '../../firebase-services/note-list.service'
   styleUrls: ['./note.component.scss']
 })
 export class NoteComponent {
-  @Input() note!:Note;
+  @Input() note!: Note;
   edit = false;
   hovered = false;
-  
-  constructor(private noteService: NoteListService){}
 
-  changeMarkedStatus(){
+  constructor(private noteService: NoteListService) { }
+
+  changeMarkedStatus() {
     this.note.marked = !this.note.marked;
     this.saveNote();
   }
 
-  deleteHovered(){
-    if(!this.edit){
+  deleteHovered() {
+    if (!this.edit) {
       this.hovered = false;
     }
   }
 
-  openEdit(){
+  openEdit() {
     this.edit = true;
   }
 
-  closeEdit(){
+  closeEdit() {
     this.edit = false;
     this.saveNote();
   }
 
-  moveToTrash(){
-    this.note.type = 'trash';
+  moveToTrash() {
+    if (this.note.id) {
+      this.note.type = 'trash';
+      let docId = this.note.id;
+      delete this.note.id;
+      this.noteService.addNote(this.note, "trash");
+      this.noteService.deleteNote("notes", docId);
+    }
   }
 
-  moveToNotes(){
+  moveToNotes() {
     this.note.type = 'note';
   }
 
-  deleteNote(){
-
+  deleteNote() {
+    if (this.note.id) {
+      this.noteService.deleteNote("trash", this.note.id);
+    }
   }
 
-  saveNote(){
+  saveNote() {
     this.noteService.updateNote(this.note);
   }
-
 }
