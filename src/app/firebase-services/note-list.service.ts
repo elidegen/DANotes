@@ -46,10 +46,9 @@ export class NoteListService {
   }
 
   async addNote(note: Note, colId: "notes" | "trash") { //
-    console.log(this.getNotesRef());
+    let notesRef = colId === "notes" ? this.getNotesRef() : this.getTrashRef();    
     
-    
-    await addDoc(this.getNotesRef(), note).catch(
+    await addDoc(notesRef, note).catch(
       (err) => { console.error(err) }
     ).then(
       (docRef) => { console.log('Document written with ID: ', docRef?.id); }

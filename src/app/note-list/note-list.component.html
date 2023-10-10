@@ -25,7 +25,6 @@
        </div>
     </div>
     <div>
-        <app-note [note]="note" *ngFor="let note of getNotesList()"></app-note>
-        <!-- <app-note *ngFor="let note of noteList" [note]="note"></app-note> -->
+        <app-note [note]="note" *ngFor="let note of (status === 'notes' ? getNotesList() : getTrashList())"></app-note>
     </div>
 </div>
